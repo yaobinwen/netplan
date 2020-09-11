@@ -412,8 +412,20 @@ class IntegrationTestsBase(unittest.TestCase):
 
 class IntegrationTestReboot(IntegrationTestsBase):
 
+    @classmethod
+    def setUpClass(klass):
+        # Try to keep autopkgtest's management network (ens3) up
+        # It should be running all the time, independently of netplan
+        os.makedirs('/etc/systemd/network', exist_ok=True)
+        with open('/etc/systemd/network/20-wired.network', 'w') as f:
+            f.write('[Match]\nName=en*\n\n[Network]\nDHCP=yes')
+        super().setUpClass()
+
     def tearDown(self):
         # Do not tearDown in the middle of a reboot test
         # Only after the 2nd part of the test ran (after reboot)
         if os.getenv('AUTOPKGTEST_REBOOT_MARK'):
             super().tearDown()
+            # Keep the management network (ens3 / 20-wired.network) up,
+            # so that the SSH/nova runner can access the test & results
+            subprocess.call(['systemctl', 'start', 'systemd-networkd'])

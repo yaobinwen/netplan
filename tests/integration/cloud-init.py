@@ -87,6 +87,7 @@ ExecStart=/usr/sbin/netplan generate
             self.addCleanup(subprocess.call, ['rm', '/run/systemd/system/netplan-dummy.service'])
             self.addCleanup(subprocess.call, ['rm', '/etc/systemd/system/cloud-init-dummy.service'])
             self.addCleanup(subprocess.call, ['systemctl', '--quiet', 'disable', 'cloud-init-dummy.service'])
+            self.addCleanup(subprocess.call, ['systemctl', '--quiet', 'enable', 'systemd-networkd.service'])
             
             time.sleep(5)  # Give some time for systemd to finish the boot transaction
             # Verify our cloud-init simulation worked
