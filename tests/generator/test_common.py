@@ -1120,6 +1120,102 @@ dns=8.8.8.8;
 method=ignore
 '''})
 
+    def test_link_local_all(self):
+        self.generate('''network:
+  renderer: NetworkManager
+  version: 2
+  ethernets:
+    engreen:
+      link-local: [ ipv4, ipv6 ]
+          ''')
+
+        self.assert_nm({'engreen': '''[connection]
+id=netplan-engreen
+type=ethernet
+interface-name=engreen
+
+[ethernet]
+wake-on-lan=0
+
+[ipv4]
+method=link-local
+
+[ipv6]
+method=link-local
+'''})
+
+    def test_link_local_ipv4(self):
+        self.generate('''network:
+  version: 2
+  renderer: NetworkManager
+  ethernets:
+    engreen:
+      link-local: [ ipv4 ]
+          ''')
+
+        self.assert_nm({'engreen': '''[connection]
+id=netplan-engreen
+type=ethernet
+interface-name=engreen
+
+[ethernet]
+wake-on-lan=0
+
+[ipv4]
+method=link-local
+
+[ipv6]
+method=disabled
+'''})
+
+    def test_link_local_ipv6(self):
+        self.generate('''network:
+  version: 2
+  renderer: NetworkManager
+  ethernets:
+    engreen:
+      link-local: [ ipv6 ]
+          ''')
+
+        self.assert_nm({'engreen': '''[connection]
+id=netplan-engreen
+type=ethernet
+interface-name=engreen
+
+[ethernet]
+wake-on-lan=0
+
+[ipv4]
+method=disabled
+
+[ipv6]
+method=link-local
+'''})
+
+    def test_link_local_disabled(self):
+        self.generate('''network:
+  version: 2
+  renderer: NetworkManager
+  ethernets:
+    engreen:
+      link-local: [ ]
+          ''')
+
+        self.assert_nm({'engreen': '''[connection]
+id=netplan-engreen
+type=ethernet
+interface-name=engreen
+
+[ethernet]
+wake-on-lan=0
+
+[ipv4]
+method=disabled
+
+[ipv6]
+method=disabled
+'''})
+
 
 class TestForwardDeclaration(TestBase):
 
